@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# PyCharm
+.idea/
+
+# Личный сейв
+nico_save.json
+
+# Архивы
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Логи
+*.log
+
+#старая версия
+NikoClicker.exe
