@@ -18,7 +18,6 @@ def _is_windows():
 
 
 def shutdown_pc(delay_sec=60):
-    """Выключает ПК через delay_sec секунд."""
     if not _is_windows():
         return False
     try:
@@ -34,7 +33,6 @@ def shutdown_pc(delay_sec=60):
 
 
 def cancel_shutdown():
-    """Отменяет запланированное выключение."""
     if not _is_windows():
         return False
     try:
@@ -49,7 +47,6 @@ def cancel_shutdown():
 
 
 def restart_pc(delay_sec=60):
-    """Перезагрузка через delay_sec секунд."""
     if not _is_windows():
         return False
     try:
@@ -62,15 +59,15 @@ def restart_pc(delay_sec=60):
     except Exception:
         return False
 
+
 def resource_path(filename):
-    """Возвращает путь к файлу — работает и в PyCharm, и внутри exe."""
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, filename)
     return filename
 
+
 pygame.mixer.init()
 
-# ---------- Палитра ----------
 COLOR_BORDER       = "#e0a13c"
 COLOR_BORDER_HOVER = "#ffcb6b"
 COLOR_PANEL        = "#150b06"
@@ -83,7 +80,6 @@ TRANSPARENT_KEY    = "#010101"
 UI_FONT       = ("Courier New", 11, "bold")
 UI_FONT_SMALL = ("Courier New", 9, "bold")
 
-# ---- Тайминги ----
 DEBUG_FAST = False
 
 if DEBUG_FAST:
@@ -160,11 +156,9 @@ class NicoClickerWidget:
 
         self.sound = pygame.mixer.Sound(resource_path("oneshot-meow-2 (1).mp3"))
 
-        # ----- Основное окно: только Нико -----
         self.label_image = tk.Label(self.root, image=self.img_active, bg='black')
         self.label_image.pack()
 
-        # ----- Окно UI: фон прозрачный -----
         self.ui_window = tk.Toplevel(self.root)
         self.ui_window.overrideredirect(True)
         self.ui_window.attributes("-topmost", True)
@@ -173,7 +167,6 @@ class NicoClickerWidget:
         self._build_ui(self.ui_window)
         self.ui_window.withdraw()
 
-        # ----- Hover с задержкой -----
         for w in (self.root, self.ui_window):
             w.bind("<Enter>", self._on_enter)
             w.bind("<Leave>", self._on_leave)
@@ -187,7 +180,6 @@ class NicoClickerWidget:
 
         self.root.protocol("WM_DELETE_WINDOW", self.quit_app)
 
-    # ================= UI =================
     def _build_ui(self, parent):
         row = tk.Frame(parent, bg=TRANSPARENT_KEY)
         row.pack(padx=4, pady=(4, 2))
@@ -218,7 +210,6 @@ class NicoClickerWidget:
             w.bind("<ButtonPress-3>", self.start_drag)
             w.bind("<B3-Motion>", self.drag)
 
-        # Поле ввода
         entry_outer, entry_inner = self._make_panel(parent, pad_x=5, pad_y=2)
         entry_outer.pack(padx=4, pady=(0, 4))
         self.entry_command = tk.Entry(
@@ -234,7 +225,6 @@ class NicoClickerWidget:
         self.entry_command.bind("<ButtonPress-3>", self.start_drag)
         self.entry_command.bind("<B3-Motion>", self.drag)
 
-        # Меню команд
         self.menu_frame = tk.Frame(parent, bg=COLOR_BORDER, padx=2, pady=2)
         menu_inner = tk.Frame(self.menu_frame, bg=COLOR_PANEL)
         menu_inner.pack(fill="both", expand=True)
@@ -256,7 +246,6 @@ class NicoClickerWidget:
 
         tk.Frame(menu_inner, bg=COLOR_BORDER, height=1).pack(fill="x", padx=6, pady=(5, 0))
 
-        # ---- Кнопка мини-игры ----
         game_btn = tk.Label(
             menu_inner, text="🎮  Мини-игра",
             font=UI_FONT_SMALL, bg=COLOR_PANEL, fg=COLOR_BORDER,
@@ -299,7 +288,6 @@ class NicoClickerWidget:
             w.bind("<Enter>", enter)
             w.bind("<Leave>", leave)
 
-    # ================= Показ / скрытие UI =================
     def _on_enter(self, event=None):
         if self._hide_timer:
             self.root.after_cancel(self._hide_timer)
@@ -334,7 +322,6 @@ class NicoClickerWidget:
         self.ui_window.withdraw()
         self.ui_visible = False
 
-    # ================= Меню команд =================
     def toggle_menu(self, event=None):
         if self.menu_open:
             self.menu_frame.pack_forget()
@@ -345,7 +332,6 @@ class NicoClickerWidget:
         self.ui_window.update_idletasks()
         self._reposition_ui()
 
-    # ================= Сохранение =================
     def load_save(self):
         try:
             if os.path.exists(self.save_file):
@@ -378,7 +364,6 @@ class NicoClickerWidget:
             self.root.destroy()
             exit()
 
-    # ================= Бездействие =================
     def _cancel_idle_timers(self):
         for name in ("timer_5s", "timer_look", "timer_upset", "timer_sleep"):
             t = getattr(self, name)
@@ -424,17 +409,14 @@ class NicoClickerWidget:
         self.label_image.config(image=self.img_sleep)
         self.timer_sleep = None
 
-    # ================= Мини-игра =================
     def start_minigame(self):
         if self.minigame is not None:
             return
         self._hide_ui()
         self.ui_window.withdraw()
 
-        # Запоминаем позицию (пригодится, если будем двигать)
         self._nico_saved_pos = (self.root.winfo_x(), self.root.winfo_y())
 
-        # Просто убираем Нико с глаз — окно остаётся, но полностью прозрачное
         self.root.attributes("-alpha", 0.0)
 
         self.minigame = PancakeMinigame(self.root, self, on_close=self._end_minigame)
@@ -449,7 +431,6 @@ class NicoClickerWidget:
         self.root.attributes("-topmost", True)
         self.save_game()
 
-    # ================= BSOD =================
     def show_bsod(self):
         if self.bsod_active:
             return
@@ -517,9 +498,6 @@ class NicoClickerWidget:
         if self.progress_value < 100:
             self.root.after(random.randint(100, 300), self.animate_bsod_progress)
 
-    # ================= Команды =================
-    # ================= Команды =================
-    # ================= Команды =================
     def process_command(self, event):
         command = self.entry_command.get().strip().lower()
         self.entry_command.delete(0, tk.END)
@@ -625,7 +603,6 @@ class NicoClickerWidget:
             self.root.after(ms, self.reset_to_active)
         self.start_idle_timers()
 
-    # ================= Речевое облако =================
     def _show_speech_bubble(self, text, duration_ms=4000, replies=None):
         self._hide_speech_bubble()
 
@@ -706,12 +683,7 @@ class NicoClickerWidget:
         self.entry_command.insert(0, reply_text)
         self.process_command(None)
 
-    # ================= Системные команды =================
     def _handle_system_command(self, command):
-        """Обработка команд выключения/перезагрузки/отмены.
-        Возвращает True, если команда распознана."""
-
-        # --- Отмена ---
         if command in ("отмена", "отменить", "cancel", "стоп"):
             if getattr(self, "_shutdown_pending", False):
                 self._shutdown_pending = False
@@ -729,7 +701,6 @@ class NicoClickerWidget:
                 return True
             return False
 
-        # --- Подтверждение выключения ---
         if getattr(self, "_shutdown_pending", False) and command in (
             "да, выключай", "да выключай", "да", "yes"
         ):
@@ -739,7 +710,6 @@ class NicoClickerWidget:
             self.root.after(2500, lambda: shutdown_pc(60))
             return True
 
-        # --- Подтверждение перезагрузки ---
         if getattr(self, "_restart_pending", False) and command in (
             "да, перезагружай", "да перезагружай", "да", "yes"
         ):
@@ -749,7 +719,6 @@ class NicoClickerWidget:
             self.root.after(2500, lambda: restart_pc(60))
             return True
 
-        # --- Запрос выключения ---
         if command in ("выключи пк", "выключи компьютер", "shutdown", "выключение"):
             self._shutdown_pending = True
             self.niko_speak(
@@ -758,7 +727,6 @@ class NicoClickerWidget:
             self.root.after(15000, lambda: setattr(self, "_shutdown_pending", False))
             return True
 
-        # --- Запрос перезагрузки ---
         if command in ("перезагрузка", "перезагрузи", "reboot", "restart"):
             self._restart_pending = True
             self.niko_speak(
@@ -777,7 +745,6 @@ class NicoClickerWidget:
             self.speech_window.destroy()
         self.speech_window = None
 
-    # ================= Клик =================
     def on_click(self, event):
         if self.wtf_active or self.pancake_active:
             return
@@ -815,292 +782,4 @@ class NicoClickerWidget:
         self.wtf_active = True
         self._cancel_idle_timers()
         if self.wtf_timer:
-            self.root.after_cancel(self.wtf_timer)
-        self.label_image.config(image=self.img_wtf)
-        self.wtf_timer = self.root.after(2000, self.end_wtf)
-
-    def end_wtf(self):
-        self.wtf_active = False
-        self.wtf_timer = None
-        self.click_times.clear()
-        self.label_image.config(image=self.img_active)
-        self.start_idle_timers()
-
-    def trigger_pancakes(self):
-        self.pancake_active = True
-        self._cancel_idle_timers()
-        if self.pancake_timer:
-            self.root.after_cancel(self.pancake_timer)
-        self.label_image.config(image=self.img_pancakes)
-        self.pancake_timer = self.root.after(2000, self.end_pancakes)
-
-    def end_pancakes(self):
-        self.pancake_active = False
-        self.pancake_timer = None
-        self.label_image.config(image=self.img_active)
-        self.start_idle_timers()
-
-    # ================= Всплывающий текст =================
-    def create_floating_text(self, text, color, size):
-        if len(text) > 15: size = 10
-        if len(text) > 25: size = 8
-        if len(text) > 35: size = 7
-
-        if len(text) > 20:
-            words = text.split()
-            lines, cur = [], ""
-            for w in words:
-                if len(cur) + len(w) + 1 <= 20:
-                    cur = f"{cur} {w}".strip()
-                else:
-                    lines.append(cur); cur = w
-            if cur: lines.append(cur)
-            text = "\n".join(lines)
-
-        pop_label = tk.Label(
-            self.root, text=text, font=("Courier New", size, "bold"),
-            fg=color, bg="black", justify="center", wraplength=180
-        )
-        self.root.update_idletasks()
-        x = max(5, (self.root.winfo_width() - pop_label.winfo_reqwidth()) // 2)
-        y = max(5, (self.root.winfo_height() - pop_label.winfo_reqheight()) // 2)
-        pop_label.place(x=x, y=y)
-        self.animate_floating_text(pop_label, y, 0)
-
-    def animate_floating_text(self, label, current_y, step):
-        if step < 60:
-            label.place(y=current_y - 2)
-            if step == 40:
-                label.config(fg="#666666")
-            self.root.after(35, self.animate_floating_text, label, current_y - 2, step + 1)
-        else:
-            label.destroy()
-
-    def reset_to_active(self):
-        if self.wtf_active or self.pancake_active or self.sleeping:
-            return
-        self.label_image.config(image=self.img_active)
-
-    # ================= Перетаскивание =================
-    def start_drag(self, event):
-        self.drag_data["x"] = event.x
-        self.drag_data["y"] = event.y
-
-    def drag(self, event):
-        dx = event.x - self.drag_data["x"]
-        dy = event.y - self.drag_data["y"]
-        new_x = self.root.winfo_x() + dx
-        new_y = self.root.winfo_y() + dy
-        self.root.geometry(f"+{new_x}+{new_y}")
-        if self.ui_visible:
-            self._reposition_ui()
-
-
-# ================= ОКНО МИНИ-ИГРЫ =================
-# ================= ОКНО МИНИ-ИГРЫ =================
-class PancakeMinigame:
-    def __init__(self, master, main_app, on_close=None):
-        self.master = master
-        self.main_app = main_app
-        self.on_close = on_close
-
-        self.W = 480
-        self.H = 360
-        self.niko_x = self.W // 2
-        self.niko_base_y = self.H - 40       # середина Нико по вертикали
-        self.niko_speed = 6                  # px за кадр (60 FPS → ~360 px/сек)
-
-        self.score = 0
-        self.caught = 0
-        self.lives = 3
-        self.running = True
-        self.pancakes = []
-        self.spawn_timer = None
-        self.update_timer = None
-        self.left_pressed = False
-        self.right_pressed = False
-
-        # ---- уменьшенный спрайт Нико ----
-        niko_img = Image.open(resource_path("Niko_speak.png")).resize((64, 64))
-        self.niko_sprite = ImageTk.PhotoImage(niko_img)
-
-        # ---- Окно ----
-        self.win = tk.Toplevel(master)
-        self.win.title("Ловим панкейки")
-        self.win.overrideredirect(False)
-        self.win.attributes("-topmost", True)
-        self.win.config(bg=COLOR_PANEL)
-        self.win.geometry(f"{self.W + 4}x{self.H + 60}+500+300")
-
-        self.win.deiconify()
-        self.win.lift()
-        self.win.focus_force()
-
-        outer = tk.Frame(self.win, bg=COLOR_BORDER, padx=2, pady=2)
-        outer.pack(fill="both", expand=True)
-        inner = tk.Frame(outer, bg=COLOR_PANEL)
-        inner.pack(fill="both", expand=True)
-
-        # ---- Заголовок с крестиком ----
-        top = tk.Frame(inner, bg=COLOR_PANEL)
-        top.pack(fill="x", padx=6, pady=(6, 2))
-
-        self.score_label = tk.Label(
-            top, text="Счёт: 0   Жизни: 3",
-            font=UI_FONT_SMALL, bg=COLOR_PANEL, fg=COLOR_TEXT
-        )
-        self.score_label.pack(side="left")
-
-        close_btn = tk.Label(
-            top, text="✕", font=("Courier New", 12, "bold"),
-            bg=COLOR_PANEL, fg=COLOR_ACCENT, cursor="hand2", padx=6
-        )
-        close_btn.pack(side="right")
-        close_btn.bind("<Button-1>", lambda e: self.close())
-        close_btn.bind("<Enter>", lambda e, b=close_btn: b.config(fg=COLOR_BORDER_HOVER))
-        close_btn.bind("<Leave>", lambda e, b=close_btn: b.config(fg=COLOR_ACCENT))
-
-        # ---- Игровое поле ----
-        self.canvas = tk.Canvas(
-            inner, width=self.W, height=self.H,
-            bg="#0b0603", highlightthickness=0
-        )
-        self.canvas.pack(padx=6, pady=(0, 6))
-
-        # Нико внизу по центру
-        self.niko_id = self.canvas.create_image(
-            self.niko_x, self.niko_base_y,
-            image=self.niko_sprite, anchor="center"
-        )
-
-        # ---- Клавиши (с удержанием) ----
-        self.win.bind("<KeyPress-Left>",   self._on_left_press)
-        self.win.bind("<KeyRelease-Left>", self._on_left_release)
-        self.win.bind("<KeyPress-Right>",   self._on_right_press)
-        self.win.bind("<KeyRelease-Right>", self._on_right_release)
-        self.win.bind("<Escape>", lambda e: self.close())
-
-        # ---- Запуск ----
-        self.spawn_timer = self.win.after(800, self._spawn_pancake)
-        self.update_timer = self.win.after(30, self._update)
-        self.win.after(16, self._move_loop)
-
-    # ---- Клавиши ----
-    def _on_left_press(self, event):
-        self.left_pressed = True
-
-    def _on_left_release(self, event):
-        self.left_pressed = False
-
-    def _on_right_press(self, event):
-        self.right_pressed = True
-
-    def _on_right_release(self, event):
-        self.right_pressed = False
-
-    def _move_loop(self):
-        if not self.running:
-            return
-        if self.left_pressed:
-            self.move_niko(-self.niko_speed)
-        if self.right_pressed:
-            self.move_niko(self.niko_speed)
-        self.win.after(16, self._move_loop)
-
-    def move_niko(self, dx):
-        if not self.running:
-            return
-        self.niko_x = max(32, min(self.W - 32, self.niko_x + dx))
-        self.canvas.coords(self.niko_id, self.niko_x, self.niko_base_y)
-
-    # ---- Панкейки ----
-    def _spawn_pancake(self):
-        if not self.running:
-            return
-        x = random.randint(30, self.W - 30)
-        speed = random.randint(3, 6) + min(4, self.caught // 5)
-        pid = self.canvas.create_text(
-            x, 20, text="🥞",
-            font=("Courier New", 22, "bold"), fill=COLOR_BORDER
-        )
-        self.pancakes.append({"id": pid, "x": x, "y": 20, "speed": speed})
-
-        interval = max(400, 900 - self.caught * 20)
-        self.spawn_timer = self.win.after(interval, self._spawn_pancake)
-
-    def _update(self):
-        if not self.running:
-            return
-
-        for p in self.pancakes[:]:
-            p["y"] += p["speed"]
-            self.canvas.coords(p["id"], p["x"], p["y"])
-
-            # поймали
-            if (p["y"] >= self.niko_base_y - 20
-                    and abs(p["x"] - self.niko_x) < 32):
-                self.canvas.delete(p["id"])
-                self.pancakes.remove(p)
-                self.caught += 1
-                self.score += 10
-                self.main_app.click_count += 1
-                self.main_app.label_counter.config(
-                    text=f"{self.main_app.click_count}"
-                )
-                self._refresh_score()
-                continue
-
-            # упал
-            if p["y"] > self.H + 20:
-                self.canvas.delete(p["id"])
-                self.pancakes.remove(p)
-                self.lives -= 1
-                self._refresh_score()
-                if self.lives <= 0:
-                    self._game_over()
-                    return
-
-        self.update_timer = self.win.after(30, self._update)
-
-    def _refresh_score(self):
-        self.score_label.config(
-            text=f"Счёт: {self.score}   Жизни: {self.lives}"
-        )
-
-    def _game_over(self):
-        self.running = False
-        self.canvas.create_text(
-            self.W // 2, self.H // 2,
-            text=f"Игра окончена!\nПоймано: {self.caught}\nСчёт: {self.score}",
-            font=("Courier New", 16, "bold"),
-            fill=COLOR_TEXT, justify="center"
-        )
-
-    def close(self):
-        self.running = False
-        if self.spawn_timer:
-            try:
-                self.win.after_cancel(self.spawn_timer)
-            except Exception:
-                pass
-            self.spawn_timer = None
-        if self.update_timer:
-            try:
-                self.win.after_cancel(self.update_timer)
-            except Exception:
-                pass
-            self.update_timer = None
-        try:
-            self.win.destroy()
-        except Exception:
-            pass
-        if self.on_close:
-            self.on_close()
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = NicoClickerWidget(root)
-    root.geometry("+500+300")
-    root.mainloop()
-
+            self.root.after_cancel(self.wtf_timer
